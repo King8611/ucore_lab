@@ -51,12 +51,41 @@ seta20.1:
 
 问题2：
 >如何初始化GDT表
+代码：
+```
+    lgdt gdtdesc
+```
+lgdt指令是初始化端寄存器gdtr，gdtr寄存器有48位，6个字节，其中2个字节表示段表长度，4个字节表示段表地址。
+```
+gdtdesc:
+    .word 0x17                                      # sizeof(gdt) - 1
+    .long gdt                                       # address gdt
+```
+其中0x17便是长度（-1），gdt就是地址。
+
+而gdt中跟了三个数据，分别表示null段，代码段和数据段。（里面用到了.h里面的宏定义，这里不做详细介绍）。
+```
+gdt:
+    SEG_NULLASM                                                 # null seg
+    SEG_ASM(STA_X|STA_R, 0x0, 0xffffffff)           # code seg for bootloader and kernel
+    SEG_ASM(STA_W, 0x0, 0xffffffff)                 # data seg for bootloader and kernel
+```
+
+
 
 问题3
 >如何使能和进入保护模式
 
+先看这段代码：
+```
+    movl %cr0, %eax
+    orl $CR0_PE_ON, %eax
+    movl %eax, %cr0
+```
+这里涉及到了cr0寄存器，我们先看cr0寄存器的介绍：
+>CR0中含有控制处理器操作模式和状态的系统控制标志；<br/>CR0的位0是启用保护（Protection Enable）标志。当设置该位时即开启了保护模式；
 
-
+上面这段代码很明显，就是把cr0的第1位置位1，说明开启保护模式。
 
 
 
