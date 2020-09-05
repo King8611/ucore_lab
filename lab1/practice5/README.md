@@ -1,3 +1,4 @@
+# 实现函数调用堆栈跟踪函数 
 coding：
 >完成kdebug.c中函数print_stackframe的实现
 
@@ -76,3 +77,31 @@ kern_init ->
 
     对比发现，这里栈中的ebp指向的内容分别是：上一个ebp，上一个指令的下一个地址，参数。
 ```
+
+参考实验手册，和上面这个调试信息我们可以对函数栈有一个清楚的认识。
+
+针对最后一行输出：
+```
+    <unknow>: -- 0x00007d71 --
+ebp:0x00007bf8 eip:0x00007c4f args:0xc031fcfa 0xc08ed88e 0x64e4d08e 0xfa7502a8 
+    <unknow>: -- 0x00007c4e --
+```
+
+这一行应该在bootmain.c里面，我们用gdb跟踪一下
+
+我们改变一下gdbinit
+```
+file obj/bootblock.o
+set architecture i8086
+target remote :1234
+b bootmain
+continue
+```
+然后在107行加个断点，继续continue，然后查看寄存器信息：
+```
+(gdb) info r    （删除无用输出）
+esp            0x7bf0   0x7bf0
+ebp            0x7bf8   0x7bf8
+eip            0x7d66   0x7d66 <bootmain+85>（这里重新运行了一下，eip有所变化）
+```
+然后就～分析不出来了。
