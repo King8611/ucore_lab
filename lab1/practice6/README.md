@@ -85,7 +85,19 @@ vector255:
     SETGATE(idt[T_SWITCH_TOK],0,GD_KTEXT,__vectors[T_SWITCH_TOK],DPL_KERNEL);
 ```
 
+最后一步：lidt，我们找到这个函数(x86.h)：
+```
+lidt(struct pseudodesc *pd) {
+    asm volatile ("lidt (%0)" :: "r" (pd));
+}
+```
+所以这段代码是：
+```
+ lidt(&idt_pd);
+```
+其中涉及到的汇编指令应该和lgdt是一个道理。
 
 
 问题3：
 >请编程完善trap.c中的中断处理函数trap，在对时钟中断进行处理的部分填写trap函数中处理时钟中断的部分，使操作系统每遇到100次时钟中断后，调用print_ticks子程序，向屏幕上打印一行文字”100 ticks”。
+
