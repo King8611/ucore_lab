@@ -101,3 +101,19 @@ lidt(struct pseudodesc *pd) {
 问题3：
 >请编程完善trap.c中的中断处理函数trap，在对时钟中断进行处理的部分填写trap函数中处理时钟中断的部分，使操作系统每遇到100次时钟中断后，调用print_ticks子程序，向屏幕上打印一行文字”100 ticks”。
 
+按照注释来写：
+```c
+    case IRQ_OFFSET + IRQ_TIMER:
+        /* LAB1 YOUR CODE : STEP 3 */
+        /* handle the timer interrupt */
+        /* (1) After a timer interrupt, you should record this event using a global variable (increase it), such as ticks in kern/driver/clock.c
+         * (2) Every TICK_NUM cycle, you can print some info using a funciton, such as print_ticks().
+         * (3) Too Simple? Yes, I think so!
+         */
+        ticks++;
+        if(ticks==TICK_NUM){
+            print_ticks();
+            ticks=0;
+        }
+        break;
+```

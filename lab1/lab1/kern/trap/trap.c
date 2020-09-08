@@ -153,6 +153,11 @@ trap_dispatch(struct trapframe *tf) {
          * (2) Every TICK_NUM cycle, you can print some info using a funciton, such as print_ticks().
          * (3) Too Simple? Yes, I think so!
          */
+        ticks++;
+        if(ticks==TICK_NUM){
+            print_ticks();
+            ticks=0;
+        }
         break;
     case IRQ_OFFSET + IRQ_COM1:
         c = cons_getc();
@@ -190,4 +195,3 @@ trap(struct trapframe *tf) {
     // dispatch based on what type of trap occurred
     trap_dispatch(tf);
 }
-
