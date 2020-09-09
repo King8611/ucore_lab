@@ -13,17 +13,16 @@ print_stackframe(void) {
       *                   the calling funciton's ebp = ss:[ebp]
       */
      //获取eip,ebp的值（这里ebp选取指针方便后续操作）
-     uint32_t *ebp=(uint32_t *)read_ebp();
-     uint32_t eip=read_eip();
-    for(int i=0;i<STACKFRAME_DEPTH&&ebp;i++){
+    uint32_t *ebp=(uint32_t *)read_ebp();
+    uint32_t eip=read_eip();
+    for(int i=0;i<STACKFRAME_DEPTH&&ebp!=0;i++){
         cprintf("ebp:0x%08x eip:0x%08x args:",ebp,eip);
         for(int j=0;j<4;j++){
-            //ebp[0]是上一个过程中ebp的值，ebp[1]是上一个过程中下一步指令地址
             cprintf("0x%08x ",ebp[2+j]);
         }
         cprintf("\n");
         print_debuginfo(eip - 1);
-        ebp=(uint32_t*)ebp[0];
         eip=ebp[1];
+         ebp=(uint32_t*)ebp[0];
     }
 }
