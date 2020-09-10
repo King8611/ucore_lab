@@ -210,27 +210,32 @@ page_init(void) {
 
     extern char end[];
 
-    npage = maxpa / PGSIZE;
+    npage = maxpa / PGSIZE;     //0x7fe0个页
     pages = (struct Page *)ROUNDUP((void *)end, PGSIZE);
-
+    
     for (i = 0; i < npage; i ++) {
         SetPageReserved(pages + i);
     }
 
     uintptr_t freemem = PADDR((uintptr_t)pages + sizeof(struct Page) * npage);
-
+    
     for (i = 0; i < memmap->nr_map; i ++) {
         uint64_t begin = memmap->map[i].addr, end = begin + memmap->map[i].size;
+        
         if (memmap->map[i].type == E820_ARM) {
+            
             if (begin < freemem) {
                 begin = freemem;
             }
             if (end > KMEMSIZE) {
                 end = KMEMSIZE;
             }
+           
             if (begin < end) {
+                
                 begin = ROUNDUP(begin, PGSIZE);
                 end = ROUNDDOWN(end, PGSIZE);
+                
                 if (begin < end) {
                     init_memmap(pa2page(begin), (end - begin) / PGSIZE);
                 }

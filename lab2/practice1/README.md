@@ -108,3 +108,37 @@ static inline list_entry_t *list_prev(list_entry_t *listelm) __attribute__((alwa
 以上便是list的基本用法了。
 
 
+接下来需要分析一下内存初始化的步骤，先进入kern_init，找到这个函数：
+```c
+    pmm_init(); 
+```
+然后这个函数里面有重要的两步：
+```c
+init_pmm_manager();
+page_init();
+```
+其中第一个函数是初始化全局内存管理器pmm_manager，是其函数指针指向default_pmm.c里面的几个函数。<br/>然后进入page_init函数，这个函数根据内存里面的空闲区域（空闲区域是在entry里面找的，找完后放到0x8000处）。根据空闲的内存块进行分页处理。（处理的过程中会调用default_init_memmap函数）。
+
+
+根据以上内容先修改一下default_init_memmap函数：
+```c
+static void
+default_init_memmap(struct Page *base, size_t n) {     //空闲块第一个页选项地址，n表示有n个空闲页
+    assert(n > 0);
+    struct Page *p = base;
+    for (; p != base + n; p ++) {
+        assert(PageReserved(p));
+        p->flags = p->property = 0;
+        set_page_ref(p, 0);
+    }
+    base->property = n;
+    SetPageProperty(base);
+    nr_free += n;
+    list_add(&free_list, &(base->page_link));
+}
+```
+其实上面这段代码已经实现了很多功能，只有最后一步list_add改成list_add_before就好了，因为添加的时候，地址要维持递增。
+
+default_alloc_pages函数没什么要改的。
+
+default_free_pages函数，最后面加个过程就好了，同样是为了维持地址递增。
